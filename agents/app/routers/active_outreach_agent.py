@@ -116,9 +116,7 @@ async def start_agent_flow(lead_details, lead_evaluation):
         json_str = json_match.group()
         logger.info(json_str)
 
-        escaped_data = json.dumps(json_str)
-        email_details = json.loads(escaped_data)
-
+        email_details = json.loads(json_str)
         campaign_type = lead_evaluation.get("next_step", None)
 
         produce(AGENT_OUTPUT_TOPIC, { "context": json.dumps({ "emails": [ email_details ], "campaign_type": campaign_type }), "lead_data": lead_details})
@@ -129,7 +127,6 @@ async def start_agent_flow(lead_details, lead_evaluation):
 async def active_outreach_agent(request: Request):
     logger.info("active-outreach-agent")
     if request.method == "POST":
-        print(request)
         data = await request.json()
 
         logger.info(data)
@@ -145,7 +142,7 @@ async def active_outreach_agent(request: Request):
 
             lead_evaluation = json.loads(context)
 
-            print(lead_evaluation)
+            logger.info(lead_evaluation)
 
             asyncio.create_task(start_agent_flow(lead_details, lead_evaluation))
 

@@ -8,7 +8,9 @@ API Endpoint:
 """
 from fastapi import APIRouter, Response, Request
 from dotenv import load_dotenv
+import json
 import logging
+from pprint import pprint
 
 # Load environment variables from .env file
 load_dotenv()
@@ -20,14 +22,14 @@ router = APIRouter()
 
 @router.api_route("/send-email-agent", methods=["GET", "POST"])
 async def send_email_agent(request: Request):
-    print("send-email-agent")
+    logger.info("send-email-agent")
     if request.method == "POST":
         data = await request.json()
 
-        print(data)
-
         for item in data:
-            print(item)
+            context = item.get("context", {})
+            context = json.loads(context)
+            pprint(context)
 
         return Response(content="Send Email Started", media_type="text/plain", status_code=200)
     else: # For local testing

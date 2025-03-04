@@ -97,7 +97,7 @@ async def start_agent_flow(lead_details, context):
         json_str = json_match.group()  # Extract JSON part
         lead_evaluation = json.loads(json_str)  # Convert to Python dictionary
 
-        print(lead_evaluation)
+        logger.info(lead_evaluation)
         
         produce(AGENT_OUTPUT_TOPIC, { "context": json.dumps(lead_evaluation), "lead_data": lead_details })
     else:
@@ -109,16 +109,16 @@ async def lead_scoring_agent(request: Request):
     if request.method == "POST":
         data = await request.json()
 
-        print(data)
+        logger.info(data)
 
         for item in data:
-            print(item)
+            logger.info(item)
 
             lead_details = item.get('lead_data', {})
             context = item.get('context', "")
 
-            print(lead_details)
-            print(context)
+            logger.info(lead_details)
+            logger.info(context)
 
             asyncio.create_task(start_agent_flow(lead_details, context))
 
@@ -140,7 +140,7 @@ async def lead_scoring_agent(request: Request):
         lead_details = item.get('lead_data', {})
         content = item.get('content', "")
 
-        print(lead_details)
+        logger.info(lead_details)
 
         # asyncio.create_task(start_agent_flow(lead_details, content))
 

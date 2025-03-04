@@ -112,14 +112,13 @@ async def lead_ingestion_agent(request: Request):
     if request.method == "POST":
         data = await request.json()
 
-        print(data)
+        logger.info(data)
 
         for item in data:
-            print(item)
+            logger.info(item)
             lead_details = item.get("lead_data", {})
-            agent_name = item.get("agent_name", {})
-                        
-            print(lead_details)
+
+            logger.info(lead_details)
         
             asyncio.create_task(start_agent_flow(lead_details))
 
