@@ -31,7 +31,7 @@ WITH (
    Input: The lead data and lead score information. Lower quality leads go to this agent.
    Output: The campaign type and a list of emails to nurture the lead.
 
-   Agent Name: Send Emails Agent
+   Agent Name: Send Email Agent
    Description: Starts email campaign to lead.
    Input: List of emails to be part of an email campaign.
    Output: A success string.
