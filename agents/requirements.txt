@@ -1,0 +1,9 @@
+fastapi
+langchain_anthropic
+langchain_core
+langgraph
+confluent_kafka
+uvicorn
+python-dotenv
+pymongo
+beautifulsoup4
