@@ -453,4 +453,4 @@ uvicorn app.main:app --reload
 2. From your browser, navigate to http://localhost:3000 and you should see a lead capture form.
 3. Enter some fake lead information.
 4. Click **Submit**.
-4. Wait for the agent flow to complete. If everything goes well, after a few minutes you'll have an email campaign in the the `email_campaigns` topic.
+4. Wait for the agent flow to complete. If everything goes well, after a few minutes you'll have an email campaign in your terminal printed by the Send Email Agent.
