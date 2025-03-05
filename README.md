@@ -38,7 +38,7 @@ into a marketing automation platform or CRM.
 
 Kafka and Flink, running on Confluent Cloud, are used to move data around between services. The web application doesn't know anything about LLMs, Kafka, or Flink.
 
-The `agents` application is a Python app that includes routes to the different agents and API endpoints called by Confluent to consume messages from Kafka topics. These API endpoints take care of all the AI magic to generate a meal plan and grocery list.
+The `agents` application is a Python app that includes routes to the different agents and API endpoints called by Confluent to consume messages from Kafka topics. These API endpoints take care of all the AI magic to generate an lead engagement plan.
 
 # What you'll need
 In order to set up and run the application, you need the following:
@@ -65,7 +65,7 @@ In MongoDB create a database called `stratusdb` with the following collections:
 
 * `leads` - Stores leads generated from the web application
 
-### Configure and run the Meal Planner AI web application
+### Configure and run the lead capture web application
 
 Go into your `web-application` folder and create a `.env` file with your MongoDB connection details.
 
@@ -99,7 +99,7 @@ In Confluent Cloud, create a new connector.
 * Search for "mongodb" and select the **MongoDB Atlas Source**
 * Enter a topic prefix as `incoming-leads`
 * In **Kafka credentials**, select **Service account** and use an existing or create a new one
-* In **Authentication,** enter your MongoDB connection details, the database name **meal_planner** and a collection name of **weekly_meal_plans**
+* In **Authentication,** enter your MongoDB connection details, the database name **stratusdb** and a collection name of **leads**
 * Under **Configuration**, select **JSON**
 * For **Sizing**, leave the defaults and click **Continue**
 * Name the connector `inbound-leads-source-connector` and click **Continue**
