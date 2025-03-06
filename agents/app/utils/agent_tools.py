@@ -76,8 +76,6 @@ def find_relevant_content(search_query):
     """
 
     data = model.invoke([{ "role": "user", "content": prompt }])
-    response = data.pretty_print()
-    logger.info(response)
 
     return response
 
@@ -112,8 +110,6 @@ def get_recent_linkedin_posts(lead_details):
     """
 
     data = model.invoke([{ "role": "user", "content": prompt }])
-    response = data.pretty_print()
-    logger.info(response)
 
     return response
 
@@ -211,8 +207,6 @@ def get_salesforce_data(lead_details):
     """
 
     data = model.invoke([{ "role": "user", "content": prompt }])
-    response = data.pretty_print()
-    logger.info(response)
 
     return response
 
@@ -337,7 +331,5 @@ def get_enriched_lead_data(lead_details):
     """
 
     data = model.invoke([{ "role": "user", "content": prompt }])
-    response = data.pretty_print()
-    logger.info(response)
 
     return response
