@@ -373,7 +373,7 @@ CREATE MODEL `agent_router`
 INPUT (text STRING)
 OUTPUT (response STRING)
 WITH (
-  'openai.connection'='openai-connection-sdr',
+  'openai.connection'='openai-connection',
   'provider'='openai',
   'task'='text_generation',
   'openai.model_version' = 'gpt-4',
