@@ -25,12 +25,13 @@ API Endpoint:
 
 """
 from fastapi import APIRouter, Response, Request
-from langchain_anthropic import ChatAnthropic
-from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
 from dotenv import load_dotenv
 import asyncio
 import logging
+from autogen_agentchat.agents import AssistantAgent
+from autogen_agentchat.conditions import TextMessageTermination
+from autogen_agentchat.teams import RoundRobinGroupChat
+from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from ..utils.agent_tools import get_company_website_information, get_salesforce_data, get_enriched_lead_data
 from ..utils.publish_to_topic import produce
 from ..utils.constants import AGENT_OUTPUT_TOPIC, PRODUCT_DESCRIPTION
@@ -42,10 +43,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-model = ChatAnthropic(model='claude-3-5-haiku-20241022', temperature=0.7)
 
-# Define tools to be used by the agent
-tools = [get_company_website_information, get_salesforce_data, get_enriched_lead_data]
+model_client = AzureOpenAIChatCompletionClient(
+    azure_deployment="gpt-4.1",
+    model="gpt-4.1",
+    api_version="2024-06-01",
+    azure_endpoint="https://bhein-m9rcaw1p-eastus2.openai.azure.com/",
+)
 
 SYSTEM_PROMPT = """
     You're an Industry Research Specialist at StratusDB, a cloud-native, AI-powered data warehouse built for B2B
@@ -57,18 +61,23 @@ SYSTEM_PROMPT = """
     and AI adoption potential to ensure a tailored and strategic approach.
     """
 
-graph = create_react_agent(model, tools=tools, state_modifier=SYSTEM_PROMPT)
+agent = AssistantAgent(
+    name="Lead_Ingestion_Agent",
+    model_client=model_client,
+    tools=[get_salesforce_data, get_enriched_lead_data, get_company_website_information],
+    system_message=SYSTEM_PROMPT
+)
 
-def print_stream(stream):
-    for s in stream:
-        message = s["messages"][-1]
-        if isinstance(message, tuple):
-            print(message)
-        else:
-            message.pretty_print()
+termination_condition = TextMessageTermination("Lead_Ingestion_Agent")
+
+# Create a team with the looped assistant agent and the termination condition.
+team = RoundRobinGroupChat(
+    [agent],
+    termination_condition=termination_condition,
+)
 
 async def start_agent_flow(lead_details):
-    inputs = {"messages": [("user", f"""
+    prompt = f"""
       Using the lead input data, conduct preliminary research on the lead. Focus on finding relevant data
       that can aid in scoring the lead and planning a strategy to pitch them. You do not need to score the lead.
 
@@ -95,12 +104,11 @@ async def start_agent_flow(lead_details):
       Company Insights - Size, market position, strategic direction, and recent news.
       Potential Use Cases - How StratusAI Warehouse could provide value to the lead's company.
       Lead Quality Assessment - Based on available data, engagement signals, and fit for StratusDB's ideal customer profile.
-      Additional Insights - Any relevant information that can aid in outreach planning or lead prioritization.""")]}
+      Additional Insights - Any relevant information that can aid in outreach planning or lead prioritization."""
     
-    response = await graph.ainvoke(inputs)
-
-    last_message_content = response["messages"][-1]
-    content = last_message_content.pretty_repr()
+    result = await team.run(task=prompt)
+    
+    content = result.messages[-1].content
 
     logger.info(f"Response from agent: {content}")
 
@@ -121,21 +129,5 @@ async def lead_ingestion_agent(request: Request):
             logger.info(lead_details)
         
             asyncio.create_task(start_agent_flow(lead_details))
-
-        return Response(content="Lead Ingestion Agent Started", media_type="text/plain", status_code=200)
-    else: # For local testing
-        full_document = {'createdAt': 1740674891490, 'leadSource': 'Demo Request', 'jobTitle': 'Account Exec', 'name': 'Sean Falconer', 'projectDescription': 'Test', 'company': 'Target', '_id': '{"$oid": "67c0974cef1e1dad39a75168"}', 'companyWebsite': 'https://www.target.com', 'email': 'falconer.sean@gmail.com'}
-
-        lead_details = {
-          "name": full_document.get("name"),
-          "email": full_document.get("email"),
-          "company_name": full_document.get("company"),
-          "company_website": full_document.get("companyWebsite"),
-          "lead_source": full_document.get("leadSource"),
-          "job_title": full_document.get("jobTitle"),
-          "project_description": full_document.get("projectDescription"),
-        }
-
-        asyncio.create_task(start_agent_flow(lead_details))
 
         return Response(content="Lead Ingestion Agent Started", media_type="text/plain", status_code=200)

@@ -1,5 +1,3 @@
-from langchain_core.tools import tool
-from langchain_anthropic import ChatAnthropic
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
@@ -7,6 +5,8 @@ import json
 import os
 import requests
 import logging
+from autogen_core.models import UserMessage
+from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
 from ..utils.constants import PRODUCT_DESCRIPTION
 
 logging.basicConfig(level=logging.INFO)
@@ -15,13 +15,17 @@ logger = logging.getLogger(__name__)
 # Load environment variables from .env file
 load_dotenv()
 
-model = ChatAnthropic(model='claude-3-5-haiku-20241022', temperature=0.7, anthropic_api_key=os.getenv("ANTHROPIC_API_KEY"))
+model_client = AzureOpenAIChatCompletionClient(
+    azure_deployment="gpt-4.1",
+    model="gpt-4.1",
+    api_version="2024-06-01",
+    azure_endpoint="https://bhein-m9rcaw1p-eastus2.openai.azure.com/",
+)
 
 def remove_empty_lines(text):
     return "\n".join([line for line in text.split("\n") if line.strip()])
 
-@tool
-def find_relevant_content(search_query):
+async def find_relevant_content(search_query: str):
     """
     Finds and returns the five most relevant marketing assets based on the given search query.
     
@@ -74,13 +78,14 @@ def find_relevant_content(search_query):
       The fake output should look like this:
       {json.dumps(example_output)}
     """
-
-    data = model.invoke([{ "role": "user", "content": prompt }])
-
+    
+    response = await model_client.create([UserMessage(content=prompt, source="user")])
+    
+    logger.info(response)
+    
     return response
 
-@tool
-def get_recent_linkedin_posts(lead_details):
+async def get_recent_linkedin_posts(lead_details: object):
     """
     Fetches and extracts recent LinkedIn posts by the prospect.
 
@@ -109,12 +114,13 @@ def get_recent_linkedin_posts(lead_details):
       {lead_details}
     """
 
-    data = model.invoke([{ "role": "user", "content": prompt }])
-
+    response = await model_client.create([UserMessage(content=prompt, source="user")])
+    
+    logger.info(response)
+    
     return response
 
-@tool
-def get_company_website_information(company_website_url):
+async def get_company_website_information(company_website_url: str):
     """
     Fetches and extracts readable text content from a company's website.
 
@@ -160,8 +166,7 @@ def get_company_website_information(company_website_url):
         logger.info(f"Error fetching website: {e}")
         return None
 
-@tool
-def get_salesforce_data(lead_details):
+async def get_salesforce_data(lead_details: object):
     """
     Generates synthetic Salesforce data for a given lead.
 
@@ -205,13 +210,14 @@ def get_salesforce_data(lead_details):
       Product details:
       {PRODUCT_DESCRIPTION}
     """
-
-    data = model.invoke([{ "role": "user", "content": prompt }])
-
+    
+    response = await model_client.create([UserMessage(content=prompt, source="user")])
+    
+    logger.info(response)
+    
     return response
 
-@tool
-def get_enriched_lead_data(lead_details):
+async def get_enriched_lead_data(lead_details: object):
     """
     Generates synthetic enriched lead data, including both person and company details.
 
@@ -329,7 +335,9 @@ def get_enriched_lead_data(lead_details):
       The fake output should look like this:
       {clearbit_sample_as_string}
     """
-
-    data = model.invoke([{ "role": "user", "content": prompt }])
-
+    
+    response = await model_client.create([UserMessage(content=prompt, source="user")])
+    
+    logger.info(response)
+    
     return response

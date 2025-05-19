@@ -1,5 +1,5 @@
 # Multi-Agent AI SDR for Lead Processing
-This application uses LangChain, Anthropic's Claude, and Confluent to create an AI-based SDR.
+This application uses Microsoft Autogen, Azure OpenAI, and Confluent to create an AI-based SDR.
 
 The multi-agent system automates the SDR workflow. Apache Flink and external model inference is used to orchestrate communication with a series of AI agents, each responsible for a specific task in the lead management and outreach process.
 
@@ -46,8 +46,7 @@ In order to set up and run the application, you need the following:
 * [Node v22.5.1](https://nodejs.org/en) or above
 * [Python 3.10](https://www.python.org/downloads/) or above
 * A [Confluent Cloud](https://www.confluent.io/) account
-* A [Claude](https://www.anthropic.com/claude) API key
-* A [LangChain](https://www.langchain.com/) API key
+* A [Azure OpenAI](https://azure.microsoft.com/en-us/products/ai-services/openai-service) API key
 * A [MongoDB](https://www.mongodb.com/) account
 
 ## Getting set up
